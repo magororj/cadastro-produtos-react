@@ -1,12 +1,14 @@
 import React, { Component } from 'react'
-
+import ProdutosService from '../../app/produtoService'
 
 const estadoInicial = {
     nome: '',
     sku: '',
     descricao: '',
     preco: 0,
-    fornecedor: ''
+    fornecedor: '',
+    sucesso: false,
+    errors: []
 }
 
 class CadastroProdutos extends React.Component {
@@ -15,6 +17,11 @@ class CadastroProdutos extends React.Component {
 
     state = estadoInicial
 
+    constructor(){
+        super()
+        this.service = new ProdutosService();
+    }
+
     onChange = (event) => {
         const valor = event.target.value
         const nomedoCampo = event.target.name
@@ -22,7 +29,22 @@ class CadastroProdutos extends React.Component {
     }
 
     onSubmit = (event) => {
-        console.log(this.state)
+        const produto = {
+            nome: this.state.nome,
+            sku: this.state.sku,
+            descricao: this.state.descricao,
+            preco: this.state.preco,
+            fornecedor: this.state.fornecedor
+
+        }
+        try {
+            this.service.salvar(produto)
+            this.limparCampos()
+            this.setState({ sucesso: true})
+        }catch(erro){
+           const errors =  erro.errors
+           this.setState({errors: errors})
+        }
     }
 
     limparCampos = () => {
@@ -39,6 +61,28 @@ class CadastroProdutos extends React.Component {
                     cadastro de Produtos
                 </div>
                 <div className="card-body">
+
+                    { this.state.sucesso && // se somente tem a testar verdadeiro basta && sem o operador ternario
+                <div className="alert alert-dismissible alert-success">
+                    <button type="button" className="close" data-dismiss="alert">&times;</button>
+                            Cadastro realizado com sucesso!
+                </div>
+                    }   
+
+                      { this.state.errors.length > 0  && // se somente tem a testar verdadeiro basta && sem o operador ternario
+
+                        this.state.errors.map( msg => {
+                            return (
+                                <div className="alert alert-dismissible alert-danger">
+                                    <button type="button" className="close" data-dismiss="alert">&times;</button>
+                                        <strong>Erro!</strong> {msg}
+                                </div>
+                            )
+                            })
+                            }      
+   
+
+
                     <div className="row">
                         <div className="col-md-6">
                             <label>Nome: *</label>
